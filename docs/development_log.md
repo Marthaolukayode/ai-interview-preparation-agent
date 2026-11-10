@@ -5,8 +5,7 @@
 **Primary stack:** n8n  
 **Development dates:** 9–12 November 2026  
 **Presentation:** Friday, 13 November 2026  
-**Status:** Approved for development; architecture planned; implementation not yet verified
-
+**Status:** MVP implementation in progress; core integrations and initial report generation successfully tested. End-to-end validation pending.
 > This is a living record. Update the morning plan and end-of-day outcomes daily. Mark a task complete only after it has been carried out and verified. Do not put API keys, CV contents, or personal information in this file.
 
 ## 1. Project objective
@@ -44,8 +43,8 @@ Instructor implementation guidance incorporated into the MVP:
 | Document n8n stack selection | **Complate** | Rationale in §6; add to README. |
 | Define data privacy controls | **Patially Complete** | Checklist in §8; settings not yet verified. |
 | Plan SAP/Microsoft RAG sources | **Complete** | Identify exact official documents and URLs. |
-| Set up and test API access | **Pending** | Test each provider separately; never commit keys. |
-| Outline GTM sprints | **Pending** | Define goals, audiences, channels, deliverables and metrics. |
+| Set up and test API access | **Complete(initial tests)** | Test each provider separately; never commit keys. |
+| Outline GTM sprints | **Complete** | Define goals, audiences, channels, deliverables and metrics. |
 
 **GitHub repository URL:** _Add the actual URL_  
 **End-of-day summary:** _Complete at the end of Day 1_  
@@ -171,8 +170,7 @@ Every generated report should contain these seven sections:
 
 **Next Steps:** Ingest official SAP and Microsoft company documents, implement company-specific retrieval and connect retrieved evidence to the interview preparation report.
 
-**Status:** Pinecone integration and retrieval test completed. Official company knowledge base ingestion pending.
-
+**Status:** Pinecone integration tested; Microsoft official document retrieval demonstrated. SAP official document ingestion and company-specific fallback verification remain pending.
 
 ## 7. RAG plan and fallback
 
@@ -197,8 +195,6 @@ Every generated report should contain these seven sections:
 
 ### 8.1 Data Privacy — Day 1 Implementation Record
 
-**Date:** 9 November 2026
-
 **Activity:** n8n Workflow Execution Settings Configuration
 
 I configured the execution settings for the AI Interview Preparation Agent to minimise the retention of applicants' personal data.
@@ -218,7 +214,7 @@ I configured the execution settings for the AI Interview Preparation Agent to mi
 - Review external API providers' data-retention policies.
 - Test the workflow using synthetic CVs.
 
-**Status:** Settings configured; save verification pending.
+**Status:** Completed – n8n workflow execution settings verified on 10 November 2026.
 
 ## 9. Daily implementation and evidence log
 
@@ -233,10 +229,63 @@ I configured the execution settings for the AI Interview Preparation Agent to mi
 - [ ] Create the n8n workflow skeleton.
 - [ ] Verify n8n execution-saving privacy settings before uploading CVs.
 
-**End-of-day completed:** _Fill in after work_  
-**Evidence / screenshots / test results:** _Fill in_  
-**Blockers and fixes:** _Fill in_  
-**Carry-over to Day 3:** _Fill in_
+**End-of-day completed:**  
+
+Configured and successfully tested Tavily and NewsAPI integrations in n8n.
+
+Configured OpenAI GPT-4o-mini for personalised interview preparation.
+
+Created and tested the Pinecone vector store with OpenAI embeddings.
+
+Successfully retrieved Microsoft company information from Pinecone.
+
+Implemented the n8n applicant form and extracted text from a synthetic PDF CV.
+
+Connected the research, retrieval and OpenAI components to generate a seven-section interview preparation report.
+
+Implemented and tested automatic report ID generation.
+
+Verified all four n8n execution-saving privacy settings.
+
+Completed the three proposed GTM experiments in gtm_future_sprints.md.
+
+
+**Evidence / screenshots / test results:** 
+
+Tavily and NewsAPI returned structured company research and news results.
+
+Pinecone returned Microsoft annual-report passages with source metadata.
+
+OpenAI successfully generated a personalised interview preparation report using synthetic candidate information.
+
+The report displayed an automatically generated identifier.
+
+n8n workflow execution settings were verified on 10 November 2026.
+
+**Blockers and fixes:**
+
+Corrected an incorrect Tavily API endpoint after receiving an HTTP 405 error.
+
+Used an Aggregate node to combine multiple Pinecone retrieval results into one input for report generation.
+
+Updated the OpenAI prompt to include the automatically generated report identifier.
+
+No unresolved API connection errors identified in the latest successful tests.
+
+**Carry-over to Day 3:**
+
+Verify SAP and Microsoft official document ingestion and company-specific retrieval.
+
+Implement and test the fallback for companies without indexed documents.
+
+Complete form input validation, privacy notice and PDF error handling.
+
+Test the complete workflow from form submission to report delivery.
+
+Generate and review the first final sample report.
+
+Export the n8n workflow and verify the GitHub push.
+
 
 ### Day 3 — Wednesday, 11 November: Autonomous core
 
