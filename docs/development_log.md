@@ -218,9 +218,10 @@ I configured the execution settings for the AI Interview Preparation Agent to mi
 
 ## 9. Daily implementation and evidence log
 
-### Day 2 — Tuesday, 10 November: Grounding + tools
 
-**Morning plan**
+### Day 2 — Tuesday, 10 November: Grounding + Tools
+
+**Morning plan:**
 - [ ] Identify and download official SAP/Microsoft RAG documents; record exact source URLs.
 - [ ] Configure Pinecone index, chunking, embeddings and company metadata.
 - [ ] Test SAP/Microsoft retrieval and non-indexed-company fallback.
@@ -229,77 +230,78 @@ I configured the execution settings for the AI Interview Preparation Agent to mi
 - [ ] Create the n8n workflow skeleton.
 - [ ] Verify n8n execution-saving privacy settings before uploading CVs.
 
-**End-of-day completed:**  
+**End-of-day completed:**
+- [x] Configured and successfully tested Tavily and NewsAPI integrations in n8n.
+- [x] Configured OpenAI GPT-4o-mini for personalised interview preparation.
+- [x] Created and tested the Pinecone vector store with OpenAI embeddings.
+- [x] Successfully retrieved Microsoft company information from Pinecone.
+- [x] Implemented the n8n applicant form and extracted text from a synthetic PDF CV.
+- [x] Connected the research, retrieval and OpenAI components to generate a seven-section interview preparation report.
+- [x] Implemented and tested automatic report ID generation.
+- [x] Verified all four n8n execution-saving privacy settings.
+- [x] Documented three proposed GTM experiments in `gtm_future_sprints.md`.
 
-Configured and successfully tested Tavily and NewsAPI integrations in n8n.
-
-Configured OpenAI GPT-4o-mini for personalised interview preparation.
-
-Created and tested the Pinecone vector store with OpenAI embeddings.
-
-Successfully retrieved Microsoft company information from Pinecone.
-
-Implemented the n8n applicant form and extracted text from a synthetic PDF CV.
-
-Connected the research, retrieval and OpenAI components to generate a seven-section interview preparation report.
-
-Implemented and tested automatic report ID generation.
-
-Verified all four n8n execution-saving privacy settings.
-
-Completed the three proposed GTM experiments in gtm_future_sprints.md.
-
-
-**Evidence / screenshots / test results:** 
-
-Tavily and NewsAPI returned structured company research and news results.
-
-Pinecone returned Microsoft annual-report passages with source metadata.
-
-OpenAI successfully generated a personalised interview preparation report using synthetic candidate information.
-
-The report displayed an automatically generated identifier.
-
-n8n workflow execution settings were verified on 10 November 2026.
+**Evidence / screenshots / test results:**
+- Tavily and NewsAPI returned structured company research and news results.
+- Pinecone returned Microsoft annual-report passages with source metadata.
+- OpenAI successfully generated a personalised interview preparation report using synthetic candidate information.
+- The report displayed an automatically generated identifier.
+- n8n workflow execution settings were verified on 10 November 2026.
 
 **Blockers and fixes:**
-
-Corrected an incorrect Tavily API endpoint after receiving an HTTP 405 error.
-
-Used an Aggregate node to combine multiple Pinecone retrieval results into one input for report generation.
-
-Updated the OpenAI prompt to include the automatically generated report identifier.
-
-No unresolved API connection errors identified in the latest successful tests.
+- Corrected an incorrect Tavily API endpoint after receiving an HTTP 405 error.
+- Used an Aggregate node to combine multiple Pinecone retrieval results into one input for report generation.
+- Updated the OpenAI prompt to include the automatically generated report identifier.
+- No unresolved API connection errors identified in the latest successful tests.
 
 **Carry-over to Day 3:**
-
-Verify SAP and Microsoft official document ingestion and company-specific retrieval.
-
-Implement and test the fallback for companies without indexed documents.
-
-Complete form input validation, privacy notice and PDF error handling.
-
-Test the complete workflow from form submission to report delivery.
-
-Generate and review the first final sample report.
-
-Export the n8n workflow and verify the GitHub push.
+- [ ] Verify SAP and Microsoft official document ingestion and company-specific retrieval.
+- [ ] Implement and test the fallback for companies without indexed documents.
+- [ ] Complete form input validation, privacy notice and PDF error handling.
+- [ ] Test the complete workflow from form submission to report delivery.
+- [ ] Generate and review the first final sample report.
+- [ ] Export the n8n workflow and verify the GitHub push.
 
 
-### Day 3 — Wednesday, 11 November: Autonomous core
+### Day 3 – Wednesday, 11 November: Autonomous Core & Report Delivery
 
-**Morning plan**
-- [ ] Implement form submission and input validation.
-- [ ] Extract CV text and process pasted job description; add optional URL fallback if feasible.
-- [ ] Connect Tavily/NewsAPI research and company-filtered Pinecone retrieval.
-- [ ] Implement CV-to-job comparison and seven-section report generation.
-- [ ] Run end-to-end test and save **first** synthetic/own-CV sample report.
+**Completed:**
+- [x] Implemented and tested the n8n form submission workflow.
+- [x] Extracted CV text, processed job descriptions and integrated Tavily, NewsAPI and Pinecone research.
+- [x] Generated personalised seven-section interview preparation reports using OpenAI.
+- [x] Configured the Form Ending node to display generated reports through the production URL.
+- [x] Added the `Format Report as HTML` JavaScript node to convert Markdown into a professionally formatted report.
+- [x] Improved report presentation with headings, lists, hyperlinks, consistent styling and report identifiers.
+- [x] Implemented the **Print / Save as PDF** button and print-specific CSS to hide the button in exported reports.
+- [x] Successfully tested production report delivery and PDF export.
+- [x] Implemented an IF node to route Microsoft/SAP requests to Pinecone and other companies to a fallback branch.
+- [x] Configured `Edit Fields1` to provide a fallback message when indexed company documents are unavailable.
+- [x] Connected both branches to OpenAI and updated the prompt to handle missing company documents.
+- [x] Successfully generated a Siemens interview preparation report using the fallback branch, including all seven report sections.
 
-**End-of-day completed:** _Fill in after work_  
-**Evidence / screenshots / test results:** _Fill in_  
-**Blockers and fixes:** _Fill in_  
-**Carry-over to Day 4:** _Fill in_
+**Evidence / screenshots / test results:**
+- Successful Microsoft interview preparation report generated through the production URL.
+- Report ID: `RPT-20261111-3527`.
+- Professional HTML report displayed in the browser.
+- Three-page A4 PDF preview verified; print button successfully hidden.
+- Siemens fallback test completed successfully using the production form.
+- Report ID: `RPT-20261111-3549`.
+- Verified all seven report sections and confirmed no unrelated Microsoft/SAP annual-report content appeared.
+
+**Instructor feedback:**
+Existing workflow, RAG implementation and product differentiation meet requirements. Additional AI agent functionality is optional; professional presentation and Notion/Slack integration were suggested.
+
+**Blockers and fixes:**
+- Raw Markdown displayed in the original Form Ending screen → resolved using JavaScript HTML conversion.
+- JavaScript syntax error during print-button implementation → corrected.
+- Print button initially appeared in PDF preview → resolved using `@media print` CSS.
+
+**Carry-over to Day 4:**
+
+- [ ] Implement input validation and error handling.
+- [ ] Improve research source citations and verify STAR examples against CV evidence.
+- [ ] Integrate Notion for additional report delivery.
+- [ ] Complete final testing and documentation.
 
 ### Day 4 — Thursday, 12 November: Harden + GTM + submission
 
