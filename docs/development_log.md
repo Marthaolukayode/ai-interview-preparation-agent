@@ -3,359 +3,316 @@
 **Project:** Ironhack Project 3 — Autonomous Company Research & Report Generation Agent  
 **Industry / use case:** HR Technology — personalised interview preparation for job seekers  
 **Primary stack:** n8n  
-**Development dates:** 9–12 November 2026  
+**Development period:** 9–12 November 2026  
 **Presentation:** Friday, 13 November 2026  
-**Status:** MVP implementation in progress; core integrations and initial report generation successfully tested. End-to-end validation pending.
-> This is a living record. Update the morning plan and end-of-day outcomes daily. Mark a task complete only after it has been carried out and verified. Do not put API keys, CV contents, or personal information in this file.
-
-## 1. Project objective
-
-Build an autonomous n8n workflow that accepts an applicant's company name, CV (PDF), pasted job advertisement text and optional job URL; researches the company; retrieves relevant official company documents when available; compares job requirements with evidence in the applicant's CV; and generates a personalised, source-supported interview preparation report.
-
-### Target user and value
-
-- **User:** Individual job seekers preparing for interviews.
-- **Problem:** Company research, job-advertisement analysis and matching personal experience to a role are time-consuming.
-- **Value:** Repeatable, evidence-based and CV-personalised preparation, rather than a generic company summary.
-
-## 2. Instructor approval and scope decisions
-
-**9 November 2026 — Approved to start building.** The instructor confirmed that the revised proposal answered the questions about personalisation, differentiation, privacy and RAG coverage.
-
-Instructor implementation guidance incorporated into the MVP:
-
-1. Use **one simple n8n form**: company name, CV upload, job description text and optional job URL. Avoid dynamic show/hide form fields.
-2. **Pasted job description text is the main path.** Job URL extraction is a bonus and must not block the workflow if a site restricts access.
-3. Test n8n **Extract From File** with **2–3 different PDF CVs on Day 2**. Scanned/image-only PDFs are not supported by the basic extraction path; provide a clear error message.
-4. Before testing with CVs, review **Workflow → Settings** in n8n and disable saving successful executions; review failed-execution saving and any other retention options. The shared n8n instance may expose saved execution data to administrators. Verify actual settings rather than assuming privacy.
-5. Test both retrieval paths: **SAP/Microsoft in Pinecone** and **a company outside the collection (e.g. Siemens)** using live research.
-6. Use **only my own CV or synthetic CVs** for tests and sample reports.
-7. Defer job-advertisement PDF upload unless time remains on Day 4.
-
-## 3. Day 1 decisions and progress — Monday, 9 November
-
-| Task | Status | Evidence / next action |
-|---|---|---|
-| Finalise project scope and obtain instructor approval | **Complete** | Instructor explicitly approved development. |
-| Set up GitHub repository | **Complete** | Record repository URL below. |
-| Define seven-section report template | **Complete** | Sections listed in §4. |
-| Design logical workflow architecture | **Complete** | Nine-stage workflow architecture documented in docs/workflow_architecture.md. Implementation scheduled for Days 2–3. |
-| Document n8n stack selection | **Complate** | Rationale in §6; add to README. |
-| Define data privacy controls | **Patially Complete** | Checklist in §8; settings not yet verified. |
-| Plan SAP/Microsoft RAG sources | **Complete** | Identify exact official documents and URLs. |
-| Set up and test API access | **Complete(initial tests)** | Test each provider separately; never commit keys. |
-| Outline GTM sprints | **Complete** | Define goals, audiences, channels, deliverables and metrics. |
+**Status as of 12 November:** Functional MVP built and tested, including Microsoft and SAP RAG, Siemens fallback, seven-section reports, HTML/PDF delivery and Notion integration. Final GitHub submission, documentation review and selected resilience checks remain.
 
-**GitHub repository URL:** _Add the actual URL_  
-**End-of-day summary:** _Complete at the end of Day 1_  
-**Blockers / decisions:** _Record any issues and next steps_
+> I record completed work and verified tests separately from outstanding items. I do not include API keys, real CV contents or other personal information in this log.
 
-## 4. Approved report template
+## 1. Project objective and scope
 
-Every generated report should contain these seven sections:
+I set out to build an autonomous n8n workflow that helps job seekers prepare for interviews. An applicant submits a company name, CV in PDF format, pasted job description, optional job URL and mandatory privacy acknowledgement. The workflow extracts CV evidence, researches the target employer, retrieves official company documents where indexed, and produces a personalised seven-section interview preparation report. The report is displayed in a browser, can be saved as a PDF and can be delivered to Notion.
 
-1. **Company overview:** Company background, products/services, recent developments and source links.
-2. **Job requirements:** Responsibilities, skills and qualifications extracted from the submitted advertisement.
-3. **CV-to-job matching:** Requirement-by-requirement evidence from the applicant's CV.
-4. **Skills and experience gaps:** Requirements **not demonstrated in the CV**, without claiming the applicant lacks the skills.
-5. **Personalised interview questions:** Questions tailored to the company, role and candidate's experience.
-6. **Suggested STAR examples:** Relevant CV experiences framed using Situation, Task, Action, Result; do not invent achievements.
-7. **Preparation recommendations:** Areas to research, practise and questions to ask the interviewer.
+**Target user:** Individual job seekers preparing for interviews.  
+**Problem:** Company research, understanding job requirements and identifying relevant CV evidence take considerable time.  
+**Value:** Repeatable, evidence-based preparation tailored to a candidate's experience rather than a generic company summary.
 
-**Report quality requirements:** Cite company claims, separate sourced facts from suggestions, acknowledge missing evidence, and avoid fabricated CV details.
+### Scope decisions
 
-## 5. Logical workflow architecture (planned)
+- I used a single n8n form rather than complex dynamic form fields.
+- I made pasted job-description text the main input; the job URL is optional and must not block report generation.
+- I limited the initial Pinecone knowledge base to **Microsoft and SAP** and used live research for other companies.
+- I used synthetic or personally authorised CVs for development and testing.
+- I deferred job-advertisement PDF upload and more complex agent frameworks to keep the MVP achievable within four days.
 
-```text
-[1. n8n Form Trigger]
-    Company name + CV PDF + pasted job text + optional URL + privacy acknowledgement
-             |
-             v
-[2. Validate Inputs]
-    Required fields, acknowledgement, PDF type, basic limits
-             |
-             v
-[3. Extract CV and Resolve Job Text]
-    Extract From File; use pasted text; optionally try URL without blocking fallback
-             |
-             v
-[4. Research Company]
-    Tavily + NewsAPI, collect source URLs and relevant passages
-             |
-             v
-[5. Retrieve Company Evidence]
-    SAP/Microsoft -> Pinecone retrieval filtered by company
-    Other company/no matching documents -> live-research-only fallback
-             |
-             v
-[6. Analyse Candidate Fit]
-    OpenAI compares job requirements with CV evidence
-             |
-             v
-[7. Generate Seven-Section Report]
-    OpenAI produces personalised, sourced report
-             |
-             v
-[8. Validate Output]
-    Required sections, source links, unsupported claims, error handling
-             |
-             v
-[9. Deliver Report]
-    Return output via a tested delivery method; minimise retained personal data
-```
+## 2. Day 1 — Monday, 9 November 2026
 
-**Proposed n8n node families:** Form Trigger, IF, Edit Fields, Extract From File, HTTP Request, Pinecone Vector Store / Pinecone API, OpenAI, Code or IF for output checks, and an appropriate response/delivery node. The final node list and delivery mechanism must be verified during implementation.
+**Focus: Project approval, scope, architecture and planning**
 
-**Error paths to build:** Missing CV/job text, unsupported or scanned PDF, unavailable URL, API timeout/rate limit, empty Pinecone retrieval, missing sources and invalid report output.
+### What I completed
 
-## 6. Stack and integration decisions
+- [x] Received instructor approval to begin building after clarifying personalisation, differentiation, privacy and RAG coverage.
+- [x] Defined the user problem, value proposition and MVP boundaries.
+- [x] Created the GitHub repository and initial documentation structure.
+- [x] Designed the seven-section interview preparation report template.
+- [x] Documented a nine-stage logical workflow architecture in `docs/workflow_architecture.md`.
+- [x] Selected n8n as the primary orchestration tool and documented the decision not to use LangGraph for this MVP.
+- [x] Planned SAP/Microsoft document retrieval, API integrations and three future go-to-market (GTM) experiments.
+- [x] Defined privacy requirements, including a mandatory acknowledgement and reduced execution-data retention.
 
-**Primary stack — n8n:** I chose n8n because its visual workflow builder supports form input, API calls, branching, retries and demonstration within a four-day MVP. It allows me to integrate document processing and company research without implementing an entire orchestration framework in code. I am not choosing LangGraph for this MVP because its code-first graph/state design would add implementation complexity beyond the time available. LangGraph may be useful later if the agent requires sophisticated stateful, multi-agent behaviour.
+### Decisions and rationale
 
-| Service | Purpose | Test status |
-|---|---|---|
-| Tavily | Live company research and sources | Tested successfully |
-| NewsAPI | Recent company news, where available | Tested successfully |
-| OpenAI API | CV-to-role analysis and report generation |Tested successfully|
-| Pinecone | Retrieval from official company documents (RAG) | Tested successfully |
+I chose **n8n** because its visual workflow builder supports form inputs, API calls, branching, retries and automated delivery within the project timeline. I considered LangGraph but did not adopt it because a code-first state-management approach would add unnecessary complexity for this MVP.
 
-**Security:** Store credentials only in n8n credential storage or local untracked environment settings. Commit `.env.example` with placeholders, not `.env` or real keys.
+I defined the following report sections:
 
-### 6.1 Tavily API — Implementation and Test Record
+1. Company overview and sourced developments
+2. Job requirements extracted from the advertisement
+3. CV-to-job matching based on documented evidence
+4. Skills and experience gaps **not demonstrated in the CV**
+5. Personalised interview questions
+6. Suggested STAR examples grounded in CV evidence
+7. Preparation recommendations and questions for the interviewer
 
-**Implementation:** Configured an n8n HTTP Request node using POST, Header Authentication and the Tavily Search API endpoint (`https://api.tavily.com/search`).
+### Instructor guidance incorporated
 
-**Test:** Submitted a company research query for SAP. Tavily successfully returned structured results containing source URLs, titles and content.
+I kept the form simple, prioritised pasted job text over URL extraction, planned PDF extraction tests, required privacy-setting checks before CV processing, and designed separate tests for indexed companies and the non-indexed fallback.
 
-**Issue and resolution:** Initially encountered an HTTP 405 error due to an incorrect endpoint. Corrected the URL and successfully executed the request.
+### End-of-day outcome
 
-**Next improvement:** Prioritise official company sources and replace the static SAP query with dynamic company input during workflow development.
-
-**Status:** Successfully tested.
-
-### 6.2 NewsAPI — Implementation and Testing
-
-**Implementation:** Configured an n8n HTTP Request node using GET, Header Authentication and the NewsAPI endpoint (`https://newsapi.org/v2/everything`).
-
-**Test:** Submitted a news search query for SAP using `sortBy=publishedAt` and `pageSize=3`. NewsAPI successfully returned structured articles containing titles, descriptions, publication information and source URLs.
-
-**Improvement identified:** Refine search queries to prioritise company-specific news and filter irrelevant articles.
-
-**Status:** Successfully tested.
-
-### 6.3 OpenAI API — Implementation and Testing
-
-**Implementation:** Configured the native OpenAI node in n8n using the `Message a Model` operation and GPT-4o-mini.
-
-**Test:** Submitted a prompt requesting three interview questions for a Product Manager position at SAP. OpenAI successfully generated relevant interview questions.
-
-**Next improvement:** Replace the static prompt with dynamic inputs from the candidate's CV, job description and company research.
-
-**Status:** Successfully tested.
-
-### 6.4 Pinecone API — Integration and Test Record
-
-**Purpose:** Store and retrieve company knowledge to support retrieval-augmented generation (RAG).
-
-**Implementation:**
-- Created the Pinecone index `interview-prep-knowledge` with 1536 dimensions and cosine similarity.
-- Connected Pinecone to n8n using API credentials.
-- Configured OpenAI `text-embedding-3-small` for document embeddings.
-- Created separate nodes for document insertion and retrieval.
-- Inserted a synthetic SAP company information document using the Default Data Loader.
-
-**Test Result:** Successful. Pinecone retrieved the inserted SAP document in response to a natural-language query about SAP's products and business priorities.
-
-**Similarity Score:** Approximately 0.648.
-
-**Next Steps:** Ingest official SAP and Microsoft company documents, implement company-specific retrieval and connect retrieved evidence to the interview preparation report.
-
-**Status:** Pinecone integration tested; Microsoft official document retrieval demonstrated. SAP official document ingestion and company-specific fallback verification remain pending.
-
-## 7. RAG plan and fallback
-
-**Initial indexed companies:** SAP and Microsoft.  
-**Documents to identify and verify:** Official company annual reports and official company/about or careers information. Record exact titles, years and source URLs before ingestion.
-
-**Indexing approach:** Extract source text, split into manageable chunks, generate embeddings, and store chunks in Pinecone with metadata such as `company`, `document_title`, `year`, `source_url` and page/section where available.
-
-**Retrieval:** Filter by the exact target company. If the company is not indexed, or no useful matching passages are found, proceed with live Tavily/NewsAPI research. Do **not** substitute SAP or Microsoft documents for Siemens or another employer. The report should disclose when no indexed company documents were used.
-
-**Test cases:** (a) SAP or Microsoft with relevant indexed passages; (b) Siemens or another non-indexed company using live research only.
-
-## 8. Data privacy and CV-handling plan
-
-- Display a clear privacy notice before CV submission, explaining purpose and providers, including that CV text is sent to OpenAI for report generation.
-- Include an acknowledgement checkbox in the form; a checkbox alone does not establish full GDPR compliance.
-- Do not upload CVs to Pinecone or commit CVs/sample personal data to GitHub.
-- Before using CVs, open **n8n Workflow → Settings**; disable saving successful executions and inspect failed executions, manual executions, binary-data storage, logs and other retention settings as available.
-- Use only synthetic or personally authorised CVs for tests; redact identifying details from public screenshots and reports.
-- Document actual provider/hosting retention limits and avoid promising immediate deletion unless verified.
-- For production use, obtain appropriate legal/privacy review covering GDPR legal basis, transparency, processors, transfers, retention and rights.
-
-### 8.1 Data Privacy — Day 1 Implementation Record
-
-**Activity:** n8n Workflow Execution Settings Configuration
-
-I configured the execution settings for the AI Interview Preparation Agent to minimise the retention of applicants' personal data.
-
-**Settings configured:**
-
-- Save successful production executions: **Do not save**
-- Save failed production executions: **Do not save**
-- Save manual executions: **Do not save**
-- Save execution progress: **Do not save**
-
-**Purpose:** These settings reduce the retention of uploaded CVs, extracted text and other personal information in n8n execution history.
-
-**Remaining privacy tasks:**
-- Add the privacy notice and acknowledgement to the applicant form.
-- Verify CV data minimisation and handling.
-- Review external API providers' data-retention policies.
-- Test the workflow using synthetic CVs.
-
-**Status:** Completed – n8n workflow execution settings verified on 10 November 2026.
-
-## 9. Daily implementation and evidence log
-
-
-### Day 2 — Tuesday, 10 November: Grounding + Tools
-
-**Morning plan:**
-- [ ] Identify and download official SAP/Microsoft RAG documents; record exact source URLs.
-- [ ] Configure Pinecone index, chunking, embeddings and company metadata.
-- [ ] Test SAP/Microsoft retrieval and non-indexed-company fallback.
-- [ ] Independently test Tavily, NewsAPI and OpenAI API connections.
-- [ ] Test Extract From File with 2–3 synthetic/own CV PDFs, including a scanned-PDF failure case if available.
-- [ ] Create the n8n workflow skeleton.
-- [ ] Verify n8n execution-saving privacy settings before uploading CVs.
-
-**End-of-day completed:**
-- [x] Configured and successfully tested Tavily and NewsAPI integrations in n8n.
-- [x] Configured OpenAI GPT-4o-mini for personalised interview preparation.
-- [x] Created and tested the Pinecone vector store with OpenAI embeddings.
-- [x] Successfully retrieved Microsoft company information from Pinecone.
-- [x] Implemented the n8n applicant form and extracted text from a synthetic PDF CV.
-- [x] Connected the research, retrieval and OpenAI components to generate a seven-section interview preparation report.
-- [x] Implemented and tested automatic report ID generation.
-- [x] Verified all four n8n execution-saving privacy settings.
-- [x] Documented three proposed GTM experiments in `gtm_future_sprints.md`.
-
-**Evidence / screenshots / test results:**
-- Tavily and NewsAPI returned structured company research and news results.
-- Pinecone returned Microsoft annual-report passages with source metadata.
-- OpenAI successfully generated a personalised interview preparation report using synthetic candidate information.
-- The report displayed an automatically generated identifier.
-- n8n workflow execution settings were verified on 10 November 2026.
-
-**Blockers and fixes:**
-- Corrected an incorrect Tavily API endpoint after receiving an HTTP 405 error.
-- Used an Aggregate node to combine multiple Pinecone retrieval results into one input for report generation.
-- Updated the OpenAI prompt to include the automatically generated report identifier.
-- No unresolved API connection errors identified in the latest successful tests.
-
-**Carry-over to Day 3:**
-- [ ] Verify SAP and Microsoft official document ingestion and company-specific retrieval.
-- [ ] Implement and test the fallback for companies without indexed documents.
-- [ ] Complete form input validation, privacy notice and PDF error handling.
-- [ ] Test the complete workflow from form submission to report delivery.
-- [ ] Generate and review the first final sample report.
-- [ ] Export the n8n workflow and verify the GitHub push.
-
-
-### Day 3 – Wednesday, 11 November: Autonomous Core & Report Delivery
-
-**Completed:**
-- [x] Implemented and tested the n8n form submission workflow.
-- [x] Extracted CV text, processed job descriptions and integrated Tavily, NewsAPI and Pinecone research.
-- [x] Generated personalised seven-section interview preparation reports using OpenAI.
-- [x] Configured the Form Ending node to display generated reports through the production URL.
-- [x] Added the `Format Report as HTML` JavaScript node to convert Markdown into a professionally formatted report.
-- [x] Improved report presentation with headings, lists, hyperlinks, consistent styling and report identifiers.
-- [x] Implemented the **Print / Save as PDF** button and print-specific CSS to hide the button in exported reports.
-- [x] Successfully tested production report delivery and PDF export.
-- [x] Implemented an IF node to route Microsoft/SAP requests to Pinecone and other companies to a fallback branch.
-- [x] Configured `Edit Fields1` to provide a fallback message when indexed company documents are unavailable.
-- [x] Connected both branches to OpenAI and updated the prompt to handle missing company documents.
-- [x] Successfully generated a Siemens interview preparation report using the fallback branch, including all seven report sections.
-
-**Evidence / screenshots / test results:**
-- Successful Microsoft interview preparation report generated through the production URL.
-- Report ID: `RPT-20261111-3527`.
-- Professional HTML report displayed in the browser.
-- Three-page A4 PDF preview verified; print button successfully hidden.
-- Siemens fallback test completed successfully using the production form.
-- Report ID: `RPT-20261111-3549`.
-- Verified all seven report sections and confirmed no unrelated Microsoft/SAP annual-report content appeared.
-
-**Instructor feedback:**
-Existing workflow, RAG implementation and product differentiation meet requirements. Additional AI agent functionality is optional; professional presentation and Notion/Slack integration were suggested.
-
-**Blockers and fixes:**
-- Raw Markdown displayed in the original Form Ending screen → resolved using JavaScript HTML conversion.
-- JavaScript syntax error during print-button implementation → corrected.
-- Print button initially appeared in PDF preview → resolved using `@media print` CSS.
-
-**Carry-over to Day 4:**
-
-- [ ] Implement input validation and error handling.
-- [ ] Improve research source citations and verify STAR examples against CV evidence.
-- [ ] Integrate Notion for additional report delivery.
-- [ ] Complete final testing and documentation.
-
-### Day 4 — Thursday, 12 November: Harden + GTM + submission
-
-**Morning plan**
-- [ ] Add validation, retry handling and clear errors for unsupported CV PDFs or failed API requests.
-- [ ] Test the SAP/Microsoft RAG path and the Siemens/non-indexed fallback path.
-- [ ] Generate **second** sample report using a different target company and synthetic/own CV.
-- [ ] Finalise `gtm_future_sprints.md` (2–3 sprints; each has goal, audience, channel, deliverable and metric).
-- [ ] Finalise README, architecture diagram, sample reports and workflow JSON export.
-- [ ] Check GitHub for secrets or personal data; verify privacy settings and documented limitations.
-- [ ] Prepare slides and rehearse the 5–7 minute presentation.
-
-**End-of-day completed:** _Fill in after work_  
-**Evidence / screenshots / test results:** _Fill in_  
-**Blockers and fixes:** _Fill in_  
-**Submission repository link:** _Fill in_
-
-### Day 5 — Friday, 13 November: Presentation only
-
-- [ ] Explain the user problem and value proposition.
-- [ ] Show n8n architecture, integrations and grounding.
-- [ ] Demonstrate a generated personalised report and RAG/fallback behaviour.
-- [ ] Explain privacy settings, limitations and GTM sprints.
-- [ ] Deliver the 5–7 minute presentation (instructor notes Friday availability only until 11:00).
-
-## 10. Future GTM sprint outline (to finalise on Day 4)
-
-| Sprint | Working title | Goal | Audience | Channel | Deliverable | Metric |
-|---|---|---|---|---|---|---|
-| 1 | Job-seeker validation | Test report usefulness | Small group of job seekers | Direct outreach | Feedback sessions + sample reports | Useful-report rating / feedback count |
-| 2 | Career-coach pilot | Test repeatable usage | Career coaches | Targeted outreach | Pilot workflow + feedback form | Pilot participation / repeat use |
-| 3 | Improve onboarding | Reduce friction | New applicants | Landing page / demo | Simplified instructions and examples | Completion rate / time to report |
-
-These are **proposals**, not completed sprints. Define measurable targets and assumptions in `gtm_future_sprints.md`.
-
-## 11. Final deliverables checklist
-
-- [ ] Working autonomous n8n workflow (exported JSON)
-- [ ] At least three tested external API/tool integrations
-- [ ] Grounded company research with Pinecone RAG and fallback
-- [ ] Two generated sample reports with synthetic/own CVs
-- [ ] Documented stack decision and architecture diagram
-- [ ] README with setup, limitations and privacy section
-- [ ] `gtm_future_sprints.md`
-- [ ] GitHub repository link and files checked
-- [ ] Presentation slides and rehearsed demo
-
-## 12. Issue and decision log template
-
-| Date | Issue or decision | What I tried / rationale | Outcome | Next action |
-|---|---|---|---|---|
-| 2026-11-09 | Instructor requested simpler input form | Use one n8n form; pasted text primary, URL optional | Scope updated | Implement on Day 3 |
-| 2026-11-09 | CV privacy on shared n8n instance | Plan to disable saved executions and verify retention settings | Pending verification | Review settings before CV tests |
+I finished Day 1 with an approved project scope, report template, documented architecture, GitHub repository and implementation plan. Technical integration and full workflow testing continued on Day 2.
 
 ---
 
-**Update rule:** After each working session, add the actual changes made, exact n8n nodes tested, sample output paths, errors and fixes. Keep the distinction between **planned**, **tested** and **completed** explicit.
+## 3. Day 2 — Tuesday, 10 November 2026
+
+**Focus: Research APIs, Pinecone, CV extraction and initial report generation**
+
+### What I completed 
+
+- [x] Configured and tested **Tavily** company research through an n8n HTTP Request node.
+- [x] Configured and tested **NewsAPI** for company-related news.
+- [x] Configured the native **OpenAI Message a Model** node using `gpt-4o-mini`.
+- [x] Created and connected the Pinecone index `interview-prep-knowledge` with OpenAI embeddings.
+- [x] Tested retrieval of company information from Pinecone, including Microsoft annual-report passages with source metadata.
+- [x] Implemented the n8n applicant form and extracted text from a synthetic PDF CV.
+- [x] Connected applicant input, research and AI generation into an initial seven-section report.
+- [x] Added automatic non-identifying report ID generation.
+- [x] Verified the n8n workflow execution-saving settings.
+- [x] Documented three proposed GTM experiments in `gtm_future_sprints.md` .
+
+### Integration and test details
+
+| Integration | Implementation and test evidence | Result |
+|---|---|---|
+| Tavily | POST request to `https://api.tavily.com/search`; returned titles, URLs and research passages for SAP | Successful |
+| NewsAPI | GET request to `https://newsapi.org/v2/everything`; tested SAP news with `sortBy=publishedAt` and `pageSize=3` | Successful |
+| OpenAI | `Message a Model` with `gpt-4o-mini`; first tested interview-question generation, then report generation | Successful |
+| Pinecone | Index `interview-prep-knowledge`, 1536 dimensions, cosine similarity, OpenAI `text-embedding-3-small`; insertion and retrieval nodes | Successful initial retrieval |
+| PDF extraction | n8n `Extract From File` on a synthetic text-based CV PDF | Successful |
+| Report generation | Seven-section personalised output and generated report identifier | Successful |
+
+During initial Pinecone setup, I inserted a synthetic SAP company document using the Default Data Loader and retrieved it using a natural-language query (similarity score approximately **0.648**). I also retrieved Microsoft company information with source metadata. Full company-specific Microsoft and SAP RAG tests were completed on Day 3.
+
+### Privacy measures configured
+
+I reviewed the workflow execution settings before continuing CV-based testing:
+
+| n8n setting | Configured value |
+|---|---|
+| Save successful production executions | Do not save |
+| Save failed production executions | Do not save |
+| Save manual executions | Do not save |
+| Save execution progress | Do not save |
+
+These settings reduce retention of CVs, extracted text and personal information in n8n execution history. I also planned the mandatory applicant privacy acknowledgement and restrictions on using real applicant data.
+
+### Issues and resolutions
+
+- **Tavily HTTP 405:** I corrected an incorrect API endpoint and retested successfully.
+- **Multiple Pinecone results:** I used an `Aggregate` node to combine retrieved document chunks before passing them to OpenAI.
+- **Report identification:** I updated the OpenAI prompt to include the automatically generated report ID.
+
+### End-of-day outcome
+
+I had working connections to Tavily, NewsAPI, OpenAI and Pinecone, a functioning form/PDF extraction path, and an initial personalised report. I carried forward production report presentation, complete company-specific RAG routing and fallback tests to Day 3.
+
+---
+
+## 4. Day 3 — Wednesday, 11 November 2026
+
+**Focus: Complete the autonomous workflow, company-specific RAG and report delivery**
+
+### What I completed
+
+- [x] Implemented and tested form submission through the production workflow.
+- [x] Integrated extracted CV text, job-description text, Tavily, NewsAPI and Pinecone into report generation.
+- [x] **Completed and tested Microsoft-specific Pinecone RAG retrieval.**
+- [x] **Completed and tested SAP-specific Pinecone RAG retrieval.**
+- [x] Added an `IF` node to route Microsoft and SAP requests to Pinecone and other companies to a live-research fallback branch.
+- [x] Configured `Edit Fields1` to provide a fallback message when indexed documents are not applicable.
+- [x] Connected both branches to OpenAI and updated the prompt to handle absent company documents without substituting unrelated evidence.
+- [x] Successfully generated a Siemens report through the fallback branch.
+- [x] Configured `Form Ending` to display reports through the production URL.
+- [x] Added `Format Report as HTML` JavaScript conversion for professional browser presentation.
+- [x] Added structured headings, lists, hyperlinks, styling and report identifiers.
+- [x] Implemented **Print / Save as PDF** and print-specific CSS.
+- [x] Verified that the print button is hidden in the PDF preview.
+
+### Verified test evidence
+
+| Test | Evidence | Status |
+|---|---|---|
+| Microsoft RAG | Microsoft official-document retrieval and successful production report, `RPT-20261111-3527` | **Completed** |
+| SAP RAG | SAP-specific Pinecone retrieval tested | **Completed** |
+| Siemens fallback | Seven-section report using live research without unrelated SAP/Microsoft documents, `RPT-20261111-3549` | **Completed** |
+| Browser delivery | HTML report displayed through the production form | **Completed** |
+| PDF export | Three-page A4 preview; print button excluded from print output | **Completed** |
+
+### Issues and resolutions
+
+- **Raw Markdown in Form Ending:** I added JavaScript conversion to HTML.
+- **JavaScript syntax error:** I corrected the print-button implementation.
+- **Print button appeared in PDF:** I added `@media print` CSS to hide it.
+- **Risk of unrelated company evidence:** I used conditional routing and a fallback message to keep SAP/Microsoft documents out of Siemens reports.
+
+### Instructor feedback
+
+My instructor confirmed that the workflow, RAG implementation and product differentiation met the project requirements. Additional AI agent functionality was optional. Professional presentation and Notion/Slack integration were suggested as useful improvements.
+
+### End-of-day outcome
+
+I completed the working Microsoft and SAP RAG paths, Siemens fallback, browser report delivery and PDF export. I reserved Day 4 for validation, resilience testing, Notion delivery, privacy review and submission preparation.
+
+---
+
+## 5. Day 4 — Thursday, 12 November 2026
+
+**Focus: Validation, error handling, Notion integration and final documentation**
+
+### What I completed
+
+- [x] Added and tested required form-field validation and privacy acknowledgement handling.
+- [x] Tested handling of unsupported or scanned/image-only PDF extraction scenarios, with user-facing error messaging.
+- [x] Simulated a **Tavily failure** by temporarily changing the endpoint; confirmed the workflow's research fallback behaviour and restored `https://api.tavily.com/search`.
+- [x] Simulated a **NewsAPI failure** by temporarily changing the endpoint; confirmed fallback behaviour and research-availability disclosure, then restored `https://newsapi.org/v2/everything`.
+- [x] Simulated an **OpenAI model failure** using an invalid model ID; configured retries (up to three attempts with a 2,000 ms wait), error-output routing and a user-friendly `Report Generation Unavailable` form response; restored `gpt-4o-mini`.
+- [x] Integrated **Notion** for automatic report delivery.
+- [x] Verified Notion child-page creation, dynamic page titles and structured report content insertion.
+- [x] Confirmed that the Notion report contained all seven sections; one successful run inserted **49 content blocks**.
+- [x] Continued refining employer identification so the hiring company is distinguished from the job-advertising platform.
+- [x] Tested Microsoft Pinecone retrieval again and received four Microsoft annual-report document chunks.
+- [x] Documented implemented privacy controls, mandatory applicant acknowledgement and remaining privacy review tasks.
+
+### Notion delivery evidence
+
+I successfully generated and delivered a report for **RiVOLUTiON GmbH**, distinguishing the hiring company from the advertising platform **TrustJobs**. The report ID was `RPT-20261112-3709`. Notion created the report page and appended structured content, including all seven sections.
+
+### Error-handling test record
+
+| Scenario | What I tested | Outcome |
+|---|---|---|
+| Missing/invalid applicant input | Required fields and privacy acknowledgement | Validation implemented and tested |
+| Unsupported/scanned CV PDF | PDF extraction error path | User-facing handling tested |
+| Tavily unavailable | Temporary invalid endpoint | Fallback tested; endpoint restored |
+| NewsAPI unavailable | Temporary invalid endpoint | Fallback/disclosure tested; endpoint restored |
+| OpenAI unavailable | Invalid model ID and retry/error branch | Friendly failure response tested; model restored |
+| Pinecone retrieval success | Microsoft documents retrieved again (`RPT-20261112-3687`) | Successful |
+| Pinecone API outage / empty-result resilience | Separate failure simulation | **Not fully verified** |
+
+I added a `Pinecone Retrieval Results` node with a `pinecone_status` field and configured aggregation of `document` into `company_documents`. The status field's final appearance in the Aggregate JSON output was not conclusively verified during the latest inspection. This is a **resilience-check limitation**, not an unfinished Microsoft or SAP RAG implementation.
+
+### Privacy and applicant consent
+
+I included a **mandatory privacy acknowledgement** in the applicant form so the applicant must acknowledge data processing before using the agent. I documented the purpose of processing and the use of external AI/research services. I continued using synthetic or personally authorised CVs for testing and avoided placing CV contents or API credentials in repository documentation.
+
+I had previously configured n8n to avoid saving successful, failed and manual execution data and execution progress. **Final re-verification of these settings after testing remains outstanding.** I do not claim that a checkbox or n8n execution settings alone establish full GDPR compliance; external-provider retention, Notion access and production legal/privacy requirements still need review.
+
+### Remaining work at the end of Day 4
+
+- [ ] Verify the final Pinecone failure/empty-result status propagation and API-outage behaviour.
+- [ ] Perform a final manual review of source citations and STAR examples against synthetic CV evidence.
+- [ ] Export and sanitise the n8n workflow JSON for GitHub.
+- [ ] Save two clearly labelled final sample reports using synthetic or authorised CV data.
+- [ ] Finalise README, architecture and documentation files in the repository.
+- [ ] Recheck execution privacy settings and Notion sharing/access before submission.
+- [ ] Commit and push the final deliverables to GitHub.
+- [ ] Prepare and rehearse the presentation.
+
+### End-of-day outcome
+
+I finished the main MVP features and key error-handling tests, including automatic Notion delivery. The outstanding items concern final quality checks, privacy review and packaging/submission rather than the completed Microsoft/SAP RAG or Siemens fallback functionality.
+
+---
+
+## 6. Architecture and technology decisions
+
+```text
+Applicant form
+  Company name + CV PDF + job description + optional URL + privacy acknowledgement
+       |
+       v
+Validate inputs and extract CV text
+       |
+       v
+Identify hiring company and gather live research
+  Tavily + NewsAPI
+       |
+       v
+Company-specific routing (IF)
+  |-- Microsoft / SAP --> Pinecone Vector Store --> Retrieval Results --> Aggregate --|
+  |-- Other companies --> Edit Fields1 (live-research fallback) ---------------------|
+                                                                                   v
+                                                                     OpenAI (gpt-4o-mini)
+                                                                                   |
+                                                                                   v
+                                                                    Seven-section report
+                                                                        /          \
+                                                                       v            v
+                                                            HTML / Form Ending    Notion
+                                                            Print / Save PDF      Report page
+```
+
+| Technology | Why I used it |
+|---|---|
+| n8n | Visual orchestration, form submission, routing and delivery |
+| Tavily | Current company research with source links |
+| NewsAPI | Recent company news when available |
+| Pinecone | Company-specific RAG for Microsoft and SAP documents |
+| OpenAI | CV-to-role analysis and personalised report generation |
+| Notion | Automated delivery of structured reports |
+| JavaScript in n8n | HTML formatting, print presentation and supporting transformations |
+
+## 7. Report quality and limitations
+
+I designed the report to distinguish **CV evidence** from inferred strengths, identify requirements **not demonstrated in the CV** rather than asserting a candidate lacks skills, and avoid invented STAR achievements. Company-specific claims should have relevant source links. Research APIs may return incomplete or irrelevant results, so final citation review is important.
+
+The initial knowledge base covers Microsoft and SAP; other employers use live research. The workflow supports text-based PDF extraction but does not provide full OCR for scanned CVs. An API failure may reduce report quality or prevent report generation, in which case the workflow should communicate the limitation rather than fabricate evidence.
+
+## 8. Future go-to-market (GTM) sprints
+
+These are **proposed future experiments**, not completed sprints.
+
+| Sprint | Goal | Audience | Channel | Deliverable | Success measure |
+|---|---|---|---|---|---|
+| 1 — Job-seeker validation | Test whether reports are useful | Small group of job seekers | Direct outreach | Feedback sessions and sample reports | Feedback count and usefulness rating |
+| 2 — Career-coach pilot | Test repeat usage | Career coaches | Targeted outreach | Pilot workflow and feedback form | Participation and repeat use |
+| 3 — Improve onboarding | Reduce applicant friction | New applicants | Landing page/demo | Clearer instructions and examples | Completion rate and time to report |
+
+Further details belong in `gtm_future_sprints.md`.
+
+## 9. Final deliverables and submission checklist
+
+| Deliverable | Status as of 12 November |
+|---|---|
+| Working n8n MVP | **Completed and tested** |
+| Tavily, NewsAPI, OpenAI and Pinecone integrations | **Completed and tested** |
+| Microsoft and SAP RAG | **Completed and tested 11 November** |
+| Siemens non-indexed fallback | **Completed and tested 11 November** |
+| Seven-section report and HTML/PDF delivery | **Completed and tested** |
+| Notion automatic report delivery | **Completed and tested 12 November** |
+| Mandatory privacy acknowledgement | **Implemented and tested** |
+| Core API and PDF error handling | **Implemented and tested; Pinecone outage check remains** |
+| Two final synthetic sample reports saved for repository | Pending final packaging |
+| Sanitised n8n workflow JSON export | Pending |
+| Final README, architecture and development log in GitHub | Pending final repository update |
+| Final privacy/Notion access review | Pending |
+| Presentation and rehearsal | Pending |
+
+**GitHub repository URL:** To be added after final submission.  
+**Presentation date:** Friday, 13 November 2026.
+
+## 10. Presentation plan — Friday, 13 November 2026
+
+- [ ] Explain the user problem and how the agent adds value.
+- [ ] Show the n8n architecture and the role of each integration.
+- [ ] Demonstrate a personalised seven-section report.
+- [ ] Explain Microsoft/SAP RAG and the Siemens live-research fallback.
+- [ ] Show Notion delivery and HTML/PDF output.
+- [ ] Explain mandatory consent, data privacy measures, error handling and known limitations.
+- [ ] Present the proposed GTM sprints and next improvements.
+- [ ] Deliver the 5–7 minute presentation.
+
+---
+
+*I will update this log only when additional work has been completed or verified. All API keys and personal CV contents remain outside project documentation.*
