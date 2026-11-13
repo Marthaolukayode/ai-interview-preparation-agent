@@ -747,7 +747,7 @@
         "pageId": {
           "__rl": true,
           "mode": "id",
-          "value": "416eac1f1716805aa8b3e393d08756f2",
+          "value": "REPLACE_WITH_YOUR_NOTION_PAGE_ID",
           "__regex": "^([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})"
         },
         "title": "={{ \"Interview Preparation Report - \" + ($('Edit Fields').first().json.hiring_company || $('Edit Fields').first().json.company_name).trim() + \" - \" + $now.setZone('Europe/Berlin').toFormat('dd.MM.yyyy HH:mm') }}\n",

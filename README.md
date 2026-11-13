@@ -2,6 +2,12 @@
 
 An AI-powered interview preparation workflow built with **n8n, OpenAI, Pinecone, Tavily, NewsAPI and Notion**. It combines applicant CV evidence, job requirements, company research and retrieval-augmented generation (RAG) to create personalised interview preparation reports.
 
+## Demo Video
+
+[Watch the AI Interview Preparation Agent Demo](https://youtu.be/coY9AXKOJZI)
+
+This video demonstrates the autonomous n8n workflow, Microsoft Pinecone RAG retrieval, personalised interview report generation, and automatic Notion report delivery.
+
 ## Project Overview
 
 The AI Interview Preparation Agent helps job seekers prepare for interviews using a structured, evidence-conscious workflow. Applicants submit a CV in PDF format, a target company and a job description. The workflow extracts CV text, validates inputs, researches the hiring company, optionally retrieves official company documents and generates a seven-section interview preparation report.
@@ -88,6 +94,35 @@ This is a conceptual overview; consult the exported n8n workflow for exact node 
 
 These identifiers are non-identifying test references, not links to public reports. Only synthetic applicant data should be published in repository samples.
 
+## How to Use the AI Interview Preparation Agent
+
+**Live Application:** [Open the AI Interview Preparation Agent](https://ac-ft-26-10-05.n8n.irn.hk/form/5fa6fa20-6233-4829-8617-5fe1517c0a07)
+
+The AI Interview Preparation Agent can be accessed through its published n8n form. Users do not need to install n8n to use the existing deployed application.
+
+### Using the Live Agent
+
+1. **Open the application:** Access the published interview preparation form using the production form URL.
+2. **Enter the hiring company:** Provide the name of the company where you are preparing for an interview (e.g., Microsoft, SAP or Siemens).
+3. **Upload your CV:** Select a text-readable PDF containing your professional experience, skills and qualifications.
+4. **Provide the job description:** Enter the requirements and responsibilities of the position.
+5. **Accept the privacy acknowledgement:** Review and accept the required consent statement before submitting.
+6. **Submit the form:** The agent validates the inputs, extracts CV information and conducts company research.
+7. **Receive your interview preparation report:** The agent generates a personalised seven-section report using the CV, job description and available company research.
+8. **Save your report:** Use the **Print and Save** option to download the generated report as a PDF.
+
+### How Company Research Works
+
+- **Microsoft and SAP:** The workflow retrieves relevant company information from the Pinecone knowledge base alongside live research.
+- **Other companies:** The workflow uses live research through Tavily and NewsAPI without requiring pre-indexed documents.
+
+The agent also creates a formatted report in the configured Notion workspace.
+
+### Important Notes
+
+- The uploaded CV must contain extractable text. Image-only or scanned PDFs may not be supported.
+- AI-generated interview answers and company information should be reviewed for accuracy.
+- Use synthetic applicant information when testing or demonstrating the application publicly.
 ## Setup and Configuration
 
 1. Import the **sanitised** n8n workflow JSON into an n8n instance.
@@ -126,6 +161,13 @@ The exported workflow is the source of truth for exact node names, credentials a
 - [Development Log](docs/development_log.md)
 - [Report Template](docs/report_template.md)
 - [Workflow Architecture](docs/workflow_architecture.md)
+- [RAG Knowledge Sources](Company_Reports/rag_sources.md)
+- [GTM Future Sprints](gtm_future_sprints.md)
+- [Presentation Slides](Presentation/project3_presentation.pdf)
+- [n8n Workflow JSON](workflows/AI%20Interview%20Preparation%20Agent.json)
+- [Complete Workflow Screenshot](workflows/screenshots/01_complete_workflow.png)
+- [Pinecone RAG Screenshot](workflows/screenshots/02_pinecone_rag.png)
+- [Sample Interview Report](workflows/screenshots/03_sample_interview_report.pdf)
 
 ## Development Timeline
 
@@ -138,9 +180,36 @@ Core n8n workflow construction and integration work: applicant form and PDF extr
 **Day 4 — 12 November 2026**  
 Validation and PDF error tests; Tavily, NewsAPI and OpenAI failure simulations and restoration; successful Microsoft Pinecone retrieval; Notion automated delivery and formatted report verification; preparation of documentation and GitHub deliverables.
 
-## Current Status — 12 November 2026
+## Current Status — 13 November 2026
 
-**Functional MVP demonstrated, with final verification and submission tasks remaining.** The working capabilities include research, report generation and Notion delivery. Microsoft and SAP RAG testing and Siemens fallback testing were completed by Day 3; Microsoft retrieval was also reconfirmed on Day 4. Outstanding work includes a **forced Pinecone outage/zero-result test**, verification that the new `pinecone_status` field reaches the OpenAI prompt, final citation/STAR review, sanitised workflow export, two repository-ready synthetic sample reports, privacy-settings recheck, final consent-flow recheck and GitHub push. These outstanding checks do not negate the completed company-path tests.
+**Functional MVP completed and demonstrated. GitHub submission preparation in progress.**
+
+The AI Interview Preparation Agent successfully processes applicant information, performs company research, generates personalised interview preparation reports and creates formatted Notion reports.
+
+**Verified capabilities:**
+- Microsoft and SAP company-specific Pinecone RAG retrieval.
+- Live research fallback for non-indexed companies, including Siemens.
+- Seven-section interview preparation report generation with HTML display and PDF export.
+- Form validation, PDF extraction error handling and tested Tavily, NewsAPI and OpenAI failure scenarios.
+- Automated Notion report creation.
+- Published production form and accessible recorded demonstration.
+
+**Repository deliverables prepared:**
+- Exported n8n workflow JSON.
+- Workflow architecture and RAG screenshots.
+- Synthetic sample interview preparation report.
+- Presentation PDF.
+- RAG source documentation.
+- Development log and GTM future-sprint plan.
+- README instructions for accessing and using the live agent.
+
+**Remaining verification before submission:**
+- Final review of workflow JSON for credentials and sensitive information.
+- Confirmation of repository links, screenshots and configuration documentation.
+- Review of execution-data privacy settings and any remaining consent-flow concerns.
+- Final Git status, commit, push and submission of the GitHub repository URL.
+
+**Known limitations:** A forced Pinecone API outage/empty-result test and a complete automated citation/STAR evidence audit have not been verified. These are future improvement areas rather than completed test results.
 
 ## Future Improvements
 
